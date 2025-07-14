@@ -247,7 +247,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.0040049846, g: 0.024460072, b: 0.05660379, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -317,7 +317,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snakePlayer: {fileID: 420979767}
   apple: {fileID: 3901982962564527394, guid: 520dc1dee4c5b8242bda518c75462fcd, type: 3}
+  deathLaser: {fileID: 4200599776316897744, guid: 1a569996a40e2814ead6d5a629889088, type: 3}
+  slicerLaser: {fileID: 6225575988591514609, guid: 5b801a05386c23a4caecb3b9d405ad83, type: 3}
   border: 0.15
+  numOfSlicers: 1
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
