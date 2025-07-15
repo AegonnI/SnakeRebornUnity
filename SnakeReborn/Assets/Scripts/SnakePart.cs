@@ -44,7 +44,13 @@ public class SnakePart : MonoBehaviour
         //}
         if (!collider.gameObject.GetComponent<SnakePart>())
         {
-            if (hasProcessed)
+            //Debug.Log(isHead);
+            if (isHead && collider.gameObject.GetComponent<Apple>())
+            {
+                transform.parent.gameObject.GetComponent<Snake>().OnChildTriggerEnter2D(collider);
+            }
+
+            else if (hasProcessed)
             {
                 hasProcessed = false;
                 transform.parent.gameObject.GetComponent<Snake>().OnChildTriggerEnter2D(collider, gameObject);

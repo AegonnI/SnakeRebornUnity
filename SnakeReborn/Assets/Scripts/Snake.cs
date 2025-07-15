@@ -4,12 +4,15 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
 using System.Linq;
+using TMPro;
 
 public class Snake : MonoBehaviour
 {
     public GameObject snakePart;
     public float speed;
     public event Action appleEated;
+
+    public TextMeshProUGUI score;
 
     private float speedFactor;
     private Vector2 _mousePosition;
@@ -46,27 +49,27 @@ public class Snake : MonoBehaviour
             appleEated();
             Destroy(collider.gameObject);
         }
-        if (collider.gameObject.GetComponent<DeathLaser>() != null)
-        {
-            //Debug.Log("I took deathlaser");
-            for (int i = snakeParts.Count - 1; i > 0; i--)
-            {
-                Destroy(snakeParts[i]);
-                snakeParts.RemoveAt(i);
-            }
-            snakeParts[0].transform.position = new Vector2();
+        //if (collider.gameObject.GetComponent<DeathLaser>() != null)
+        //{
+        //    //Debug.Log("I took deathlaser");
+        //    for (int i = snakeParts.Count - 1; i > 0; i--)
+        //    {
+        //        Destroy(snakeParts[i]);
+        //        snakeParts.RemoveAt(i);
+        //    }
+        //    snakeParts[0].transform.position = new Vector2();
 
-            Destroy(collider.gameObject);
-        }
+        //    Destroy(collider.gameObject);
+        //}
     }
     public void OnChildTriggerEnter2D(Collider2D collider, GameObject snakePartObj)
     {
-        if (collider.gameObject.GetComponent<Apple>())
-        {
-            appleEated();
-            Destroy(collider.gameObject);
-            SnakePart.hasProcessed = true;
-        }
+        //if (collider.gameObject.GetComponent<Apple>())
+        //{
+        //    appleEated();
+        //    Destroy(collider.gameObject);
+        //    SnakePart.hasProcessed = true;
+        //}
         if (collider.gameObject.GetComponent<DeathLaser>())
         {
             //Debug.Log("I took deathlaser");
@@ -76,9 +79,10 @@ public class Snake : MonoBehaviour
                 snakeParts.RemoveAt(i);
             }
             snakeParts[0].transform.position = new Vector2();
+            score.text = snakeParts.Count.ToString();
 
             Destroy(collider.gameObject);
-            SnakePart.hasProcessed = true;
+            //SnakePart.hasProcessed = true;
         }
         if (collider.gameObject.GetComponent<SlicerLaser>())
         {
@@ -94,10 +98,12 @@ public class Snake : MonoBehaviour
                     Destroy(snakeParts[i]);
                     snakeParts.RemoveAt(i);
                 }
+                score.text = snakeParts.Count.ToString();
             }
-            Destroy(collider.gameObject);
-            SnakePart.hasProcessed = true;
+            //Destroy(collider.gameObject);
+            //SnakePart.hasProcessed = true;
         }
+        SnakePart.hasProcessed = true;
     }
 
     public void GrowUp()
@@ -106,5 +112,6 @@ public class Snake : MonoBehaviour
         {
             snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
         }
-    }
+        score.text = snakeParts.Count.ToString();
+}
 }
