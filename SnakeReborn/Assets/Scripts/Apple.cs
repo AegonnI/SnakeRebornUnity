@@ -6,26 +6,23 @@ public class Apple : MonoBehaviour
 
     private void Start()
     {
-        float chance = Random.Range(0f, AppleEffectManager.sumOfWeights);
+        effect = GetRandomEffect();
 
-        Debug.Log(AppleEffectManager.effects == null);
+        gameObject.GetComponent<SpriteRenderer>().color = effect.color;
+        //Debug.Log(effect.effectName);
+        //print(effect.effectName);
+    }
 
-        float cumWieghts = 0f;
-        foreach (AppleEffectData eff in AppleEffectManager.effects)
+    public AppleEffectData GetRandomEffect()
+    {
+        float randomValue = Random.Range(0f, AppleEffectManager.sumOfWeights);
+        float cumulative = 0f;
+        foreach (var effect in AppleEffectManager.effects)
         {
-            if (eff == null)
-            {
-                Debug.LogWarning("Найден null-эффект в списке!");
-                continue;
-            }
-
-            if (eff.weight + cumWieghts < chance) 
-            { 
-                effect = eff;
-                break;
-            }
-            cumWieghts += eff.weight;
+            cumulative += effect.weight;
+            if (randomValue <= cumulative)
+                return effect;
         }
-        print(effect.effectName);
+        return new AppleEffectData();
     }
 }

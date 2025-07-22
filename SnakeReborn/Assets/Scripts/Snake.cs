@@ -17,10 +17,13 @@ public class Snake : MonoBehaviour
     private float speedFactor;
     private Vector2 _mousePosition;
     private List<GameObject> snakeParts;
+    private AppleEffectData effectOnSnake;
 
 
     void Start()
     {
+        effectOnSnake = new AppleEffectData();
+        
         appleEated += GrowUp;
         
         speedFactor = 70f / speed;
@@ -34,12 +37,17 @@ public class Snake : MonoBehaviour
 
     void Update()
     {
-        _mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);       
-        for (int i = snakeParts.Count-1; i > 0; i--)
+        _mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        if (snakeParts.Count > 1)
         {
-            snakeParts[i].transform.position = snakeParts[i - 1].transform.position;
+            snakeParts.Insert(1, snakeParts[^1]);
+            snakeParts.RemoveAt(snakeParts.Count - 1); 
+            snakeParts[1].transform.position = snakeParts[0].transform.position;
         }
-        snakeParts[0].transform.position = (_mousePosition + (speedFactor - 1f) * (Vector2)snakeParts[0].transform.position) / speedFactor;
+
+        float newSpeedFactor = speedFactor / effectOnSnake.speedMultiplier;
+        snakeParts[0].transform.position = (_mousePosition + (newSpeedFactor - 1f) * (Vector2)snakeParts[0].transform.position) / newSpeedFactor;
     }
 
     public void OnChildTriggerEnter2D(Collider2D collider)
@@ -47,61 +55,51 @@ public class Snake : MonoBehaviour
         if (collider.gameObject.GetComponent<Apple>() != null)
         {
             appleEated();
+            effectOnSnake = collider.gameObject.GetComponent<Apple>().effect;
             Destroy(collider.gameObject);
         }
-        //if (collider.gameObject.GetComponent<DeathLaser>() != null)
-        //{
-        //    //Debug.Log("I took deathlaser");
-        //    for (int i = snakeParts.Count - 1; i > 0; i--)
-        //    {
-        //        Destroy(snakeParts[i]);
-        //        snakeParts.RemoveAt(i);
-        //    }
-        //    snakeParts[0].transform.position = new Vector2();
-
-        //    Destroy(collider.gameObject);
-        //}
     }
     public void OnChildTriggerEnter2D(Collider2D collider, GameObject snakePartObj)
     {
-        //if (collider.gameObject.GetComponent<Apple>())
-        //{
-        //    appleEated();
-        //    Destroy(collider.gameObject);
-        //    SnakePart.hasProcessed = true;
-        //}
         if (collider.gameObject.GetComponent<DeathLaser>())
         {
-            //Debug.Log("I took deathlaser");
-            for (int i = snakeParts.Count - 1; i > 0; i--)
+            if (!effectOnSnake.givesInvincibility)
             {
-                Destroy(snakeParts[i]);
-                snakeParts.RemoveAt(i);
-            }
-            snakeParts[0].transform.position = new Vector2();
-            score.text = snakeParts.Count.ToString();
-
-            Destroy(collider.gameObject);
-            //SnakePart.hasProcessed = true;
-        }
-        if (collider.gameObject.GetComponent<SlicerLaser>())
-        {
-            //Debug.Log("chik");
-
-            int indexForSlice = snakeParts.IndexOf(snakePartObj);
-            Debug.Log(indexForSlice);
-
-            if (indexForSlice > 0)
-            {
-                for (int i = snakeParts.Count - 1; i > indexForSlice; i--)
+                for (int i = snakeParts.Count - 1; i > 0; i--)
                 {
                     Destroy(snakeParts[i]);
                     snakeParts.RemoveAt(i);
                 }
+                snakeParts[0].transform.position = new Vector2();
                 score.text = snakeParts.Count.ToString();
             }
-            //Destroy(collider.gameObject);
-            //SnakePart.hasProcessed = true;
+            else
+            {
+                GrowUp();
+            }
+            Destroy(collider.gameObject);
+        }
+        if (collider.gameObject.GetComponent<SlicerLaser>())
+        {
+            if (!effectOnSnake.givesInvincibility)
+            {
+                int indexForSlice = snakeParts.IndexOf(snakePartObj);
+
+                if (indexForSlice > 0)
+                {
+                    for (int i = snakeParts.Count - 1; i > indexForSlice; i--)
+                    {
+                        Destroy(snakeParts[i]);
+                        snakeParts.RemoveAt(i);
+                    }
+                    score.text = snakeParts.Count.ToString();
+                }
+            }
+            else
+            {
+                Destroy(collider.gameObject);
+                GrowUp();
+            }
         }
         SnakePart.hasProcessed = true;
     }

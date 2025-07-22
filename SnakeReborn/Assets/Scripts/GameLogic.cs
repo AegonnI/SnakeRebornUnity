@@ -20,6 +20,9 @@ public class GameLogic : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //QualitySettings.vSyncCount = 1;
+
+
         cam = Camera.main;
         float camHeight = cam.orthographicSize * 2;
         float camWidth = camHeight * cam.aspect;
