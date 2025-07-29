@@ -322,7 +322,7 @@ MonoBehaviour:
   deathLaser: {fileID: 4200599776316897744, guid: 1a569996a40e2814ead6d5a629889088, type: 3}
   slicerLaser: {fileID: 6225575988591514609, guid: 5b801a05386c23a4caecb3b9d405ad83, type: 3}
   border: 0.15
-  numOfSlicers: 1
+  numOfSlicers: 2
 --- !u!114 &519420034
 MonoBehaviour:
   m_ObjectHideFlags: 0

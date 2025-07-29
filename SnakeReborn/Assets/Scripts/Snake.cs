@@ -30,9 +30,11 @@ public class Snake : MonoBehaviour
         
         _mousePosition = new Vector2();
         snakeParts = new List<GameObject>();
+        snakePart.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
         snakePart.GetComponent<SnakePart>().isHead = true;
         snakeParts.Add(Instantiate(snakePart, _mousePosition, Quaternion.identity, transform));
         snakePart.GetComponent<SnakePart>().isHead = false;
+        
     }
 
     void Update()
@@ -55,7 +57,15 @@ public class Snake : MonoBehaviour
         if (collider.gameObject.GetComponent<Apple>() != null)
         {
             appleEated();
-            effectOnSnake = collider.gameObject.GetComponent<Apple>().effect;
+            if (effectOnSnake != collider.gameObject.GetComponent<Apple>().effect)
+            {
+                effectOnSnake = collider.gameObject.GetComponent<Apple>().effect;
+                Color color = effectOnSnake.effectName == (new AppleEffectData().effectName) ? Color.white : effectOnSnake.color;
+                for (int i = 0; i < snakeParts.Count; i++)
+                {
+                    snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
+                }
+            }         
             Destroy(collider.gameObject);
         }
     }
@@ -106,10 +116,11 @@ public class Snake : MonoBehaviour
 
     public void GrowUp()
     {
+        snakePart.gameObject.GetComponent<SpriteRenderer>().color = effectOnSnake.effectName == (new AppleEffectData().effectName) ? Color.white : effectOnSnake.color;
         for (int i = 0; i < 5; i++) 
         {
             snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
         }
         score.text = snakeParts.Count.ToString();
-}
+    }
 }
