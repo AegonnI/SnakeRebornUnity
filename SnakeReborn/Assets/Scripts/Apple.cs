@@ -8,7 +8,7 @@ public class Apple : MonoBehaviour
     {
         effect = GetRandomEffect();
 
-        gameObject.GetComponent<SpriteRenderer>().color = effect.color;
+        gameObject.GetComponent<SpriteRenderer>().color = effect.appleColor;
         //Debug.Log(effect.effectName);
         //print(effect.effectName);
     }

@@ -19,15 +19,17 @@ public class AppleEffectManager : MonoBehaviour
         effects[^1].effectName = "Effect of speed";
         effects[^1].speedMultiplier = 2.5f;
         effects[^1].durationInSec = 4.0f;
-        effects[^1].weight = 0.3f;
-        effects[^1].color = Color.purple;
+        effects[^1].weight = 0.1f;
+        effects[^1].appleColor = Color.purple;
+        effects[^1].snakeColor = Color.purple;
 
         effects.Add(new AppleEffectData());
         effects[^1].effectName = "Invincibility";
         effects[^1].givesInvincibility = true;
         effects[^1].durationInSec = 4.0f;
-        effects[^1].weight = 0.15f;
-        effects[^1].color = Color.gold;
+        effects[^1].weight = 0.05f;
+        effects[^1].appleColor = Color.gold;
+        effects[^1].snakeColor = Color.gold;
 
         foreach (AppleEffectData data in effects)
         {

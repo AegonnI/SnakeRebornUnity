@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using System;
 using System.Linq;
 using TMPro;
+using Unity.Mathematics;
 
 public class Snake : MonoBehaviour
 {
@@ -13,11 +14,14 @@ public class Snake : MonoBehaviour
     public event Action appleEated;
 
     public TextMeshProUGUI score;
+    public TextMeshProUGUI timerText;
 
     private float speedFactor;
     private Vector2 _mousePosition;
     private List<GameObject> snakeParts;
     private AppleEffectData effectOnSnake;
+
+    private float timer;
 
 
     void Start()
@@ -50,6 +54,18 @@ public class Snake : MonoBehaviour
 
         float newSpeedFactor = speedFactor / effectOnSnake.speedMultiplier;
         snakeParts[0].transform.position = (_mousePosition + (newSpeedFactor - 1f) * (Vector2)snakeParts[0].transform.position) / newSpeedFactor;
+    
+        if (effectOnSnake.effectName != new AppleEffectData().effectName)         
+        {         
+            if (Time.time >= timer + effectOnSnake.durationInSec)
+            {
+                GetEffect(new AppleEffectData());
+                timerText.text = "";
+                return;
+            }
+
+            timerText.text = (timer + effectOnSnake.durationInSec - Time.time).ToString();
+        }
     }
 
     public void OnChildTriggerEnter2D(Collider2D collider)
@@ -57,14 +73,10 @@ public class Snake : MonoBehaviour
         if (collider.gameObject.GetComponent<Apple>() != null)
         {
             appleEated();
-            if (effectOnSnake != collider.gameObject.GetComponent<Apple>().effect)
+            //if (effectOnSnake != collider.gameObject.GetComponent<Apple>().effect)
+            if (collider.gameObject.GetComponent<Apple>().effect.effectName != new AppleEffectData().effectName)
             {
-                effectOnSnake = collider.gameObject.GetComponent<Apple>().effect;
-                Color color = effectOnSnake.effectName == (new AppleEffectData().effectName) ? Color.white : effectOnSnake.color;
-                for (int i = 0; i < snakeParts.Count; i++)
-                {
-                    snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
-                }
+                GetEffect(collider.gameObject.GetComponent<Apple>().effect);
             }         
             Destroy(collider.gameObject);
         }
@@ -116,11 +128,26 @@ public class Snake : MonoBehaviour
 
     public void GrowUp()
     {
-        snakePart.gameObject.GetComponent<SpriteRenderer>().color = effectOnSnake.effectName == (new AppleEffectData().effectName) ? Color.white : effectOnSnake.color;
+        snakePart.gameObject.GetComponent<SpriteRenderer>().color = effectOnSnake.snakeColor;
         for (int i = 0; i < 5; i++) 
         {
             snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
         }
         score.text = snakeParts.Count.ToString();
+    }
+
+    private void GetEffect(AppleEffectData effect)
+    {
+        effectOnSnake = effect;
+
+        timer = Time.time;
+
+        Color color = effectOnSnake.snakeColor;
+        for (int i = 0; i < snakeParts.Count; i++)
+        {
+            snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
+        }
+
+        timerText.color = color;
     }
 }
