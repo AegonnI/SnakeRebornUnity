@@ -17,12 +17,8 @@ public class GameLogic : MonoBehaviour
     private Vector2 topLeft;
     private Vector2 bottomRight;
  
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //QualitySettings.vSyncCount = 1;
-
-
         cam = Camera.main;
         float camHeight = cam.orthographicSize * 2;
         float camWidth = camHeight * cam.aspect;
@@ -32,25 +28,25 @@ public class GameLogic : MonoBehaviour
         snakePlayer.GetComponent<Snake>().appleEated += GenApple;
 
         GenApple();
-        GenDeathLaser();
+        GenLaser(deathLaser);
         for (int i = 0; i < numOfSlicers; i++)
         {
-            GenSlicerLaser();
+            GenLaser(slicerLaser);
         }
     }
 
     public void DeleteObjectAbroad(GameObject gameObject)
     {
+        Destroy(gameObject);
         if (gameObject.GetComponent<DeathLaser>())
         {
-            //Debug.Log("I DeleteObjectAbroad");
-            Destroy(gameObject);
-            GenDeathLaser();
+            GenLaser(deathLaser);
+            return;
         }
         if (gameObject.GetComponent<SlicerLaser>())
         {
-            Destroy(gameObject);
-            GenSlicerLaser();
+            GenLaser(slicerLaser);
+            return;
         }
     }
 
@@ -93,14 +89,8 @@ public class GameLogic : MonoBehaviour
         return startPos;
     }
 
-    void GenDeathLaser()
+    void GenLaser(GameObject laser)
     {
-        //Debug.Log("I gen a new deathlaser");
-        Instantiate(deathLaser, GenDir(deathLaser), Quaternion.identity, transform);
-    }
-
-    void GenSlicerLaser()
-    {
-        Instantiate(slicerLaser, GenDir(slicerLaser), Quaternion.identity, transform);
+        Instantiate(laser, GenDir(laser), Quaternion.identity, transform);
     }
 }

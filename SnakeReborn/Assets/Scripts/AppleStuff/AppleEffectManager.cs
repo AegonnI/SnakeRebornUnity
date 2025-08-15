@@ -17,8 +17,10 @@ public class AppleEffectManager : MonoBehaviour
 
         effects.Add(new AppleEffectData());
         effects[^1].effectName = "Effect of speed";
-        effects[^1].speedMultiplier = 2.5f;
+        //effects[^1].speedMultiplier = 3f;
+        effects[^1].speedMultiplier = 24f;
         effects[^1].durationInSec = 4.0f;
+        //effects[^1].weight = 0.2f;
         effects[^1].weight = 0.1f;
         effects[^1].appleColor = Color.purple;
         effects[^1].snakeColor = Color.purple;

@@ -150,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snakePart: {fileID: 4233817427975366172, guid: e68c645ac9ad15d4d8b4099e4fa7aa7a, type: 3}
   speed: 1.5
+  fractionOfDistancePerSecond: 0.92
   score: {fileID: 2075312426}
   timerText: {fileID: 768681213}
 --- !u!4 &420979769
