@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR;
 
 public class GameLogic : MonoBehaviour
@@ -16,7 +18,9 @@ public class GameLogic : MonoBehaviour
     private Camera cam;
     private Vector2 topLeft;
     private Vector2 bottomRight;
- 
+
+    //private List<GameObject> lasers;
+
     void Start()
     {
         cam = Camera.main;
@@ -24,6 +28,8 @@ public class GameLogic : MonoBehaviour
         float camWidth = camHeight * cam.aspect;
         topLeft = (Vector2)cam.transform.position + new Vector2(-camWidth / 2, camHeight / 2);
         bottomRight = (Vector2)cam.transform.position + new Vector2(camWidth / 2, -camHeight / 2);
+
+        snakePlayer = Instantiate(snakePlayer, new Vector2(0f, 0f), Quaternion.identity, transform);
 
         snakePlayer.GetComponent<Snake>().appleEated += GenApple;
 
@@ -33,6 +39,17 @@ public class GameLogic : MonoBehaviour
         {
             GenLaser(slicerLaser);
         }
+    }
+
+    void OnPause()
+    {
+        Laser[] lasers = GetComponentsInChildren<Laser>();
+        foreach (var laser in lasers)
+        {
+            laser.isPause = !laser.isPause;
+        }
+
+        GetComponentInChildren<Snake>().isPause = !GetComponentInChildren<Snake>().isPause;
     }
 
     public void DeleteObjectAbroad(GameObject gameObject)

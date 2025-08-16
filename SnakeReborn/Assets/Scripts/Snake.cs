@@ -15,6 +15,7 @@ public class Snake : MonoBehaviour
     public float speed;
     public float fractionOfDistancePerSecond;
     public event Action appleEated;
+    public bool isPause;
 
     public TextMeshProUGUI score;
     public TextMeshProUGUI timerText;
@@ -39,14 +40,18 @@ public class Snake : MonoBehaviour
         snakePart.GetComponent<SnakePart>().isHead = true;
         snakeParts.Add(Instantiate(snakePart, new Vector2(0f, 0f), Quaternion.identity, transform));
         snakePart.GetComponent<SnakePart>().isHead = false;
-        
+
+        isPause = false;
+
     }
 
     void Update()
     {
-        SnakeMove();
-
-        CheckAndExpireEffect();
+        if (!isPause)
+        {
+            SnakeMove();
+            CheckAndExpireEffect();
+        }       
     }
 
     public void OnChildTriggerEnter2D(Collider2D collider)
@@ -54,7 +59,6 @@ public class Snake : MonoBehaviour
         if (collider.gameObject.GetComponent<Apple>() != null)
         {
             appleEated();
-            //if (effectOnSnake != collider.gameObject.GetComponent<Apple>().effect)
             if (collider.gameObject.GetComponent<Apple>().effect.effectName != new AppleEffectData().effectName)
             {
                 GetEffect(collider.gameObject.GetComponent<Apple>().effect);
@@ -66,45 +70,56 @@ public class Snake : MonoBehaviour
     {
         if (collider.gameObject.GetComponent<DeathLaser>())
         {
-            if (!effectOnSnake.givesInvincibility)
-            {
-                for (int i = snakeParts.Count - 1; i > 0; i--)
-                {
-                    Destroy(snakeParts[i]);
-                    snakeParts.RemoveAt(i);
-                }
-                snakeParts[0].transform.position = new Vector2();
-                score.text = snakeParts.Count.ToString();
-            }
-            else
-            {
-                GrowUp();
-            }
+            Death();
             Destroy(collider.gameObject);
         }
         if (collider.gameObject.GetComponent<SlicerLaser>())
         {
-            if (!effectOnSnake.givesInvincibility)
-            {
-                int indexForSlice = snakeParts.IndexOf(snakePartObj);
-
-                if (indexForSlice > 0)
-                {
-                    for (int i = snakeParts.Count - 1; i > indexForSlice; i--)
-                    {
-                        Destroy(snakeParts[i]);
-                        snakeParts.RemoveAt(i);
-                    }
-                    score.text = snakeParts.Count.ToString();
-                }
-            }
-            else
-            {
-                Destroy(collider.gameObject);
-                GrowUp();
-            }
+            Slice(collider.gameObject, snakePartObj);
+            //Destroy(collider.gameObject);
         }
         SnakePart.hasProcessed = true;
+    }
+
+    public void Death()
+    {
+        if (!effectOnSnake.givesInvincibility)
+        {
+            for (int i = snakeParts.Count - 1; i > 0; i--)
+            {
+                Destroy(snakeParts[i]);
+                snakeParts.RemoveAt(i);
+            }
+            snakeParts[0].transform.position = new Vector2();
+            //score.text = snakeParts.Count.ToString();
+        }
+        else
+        {
+            GrowUp();
+        }
+    }
+
+    public void Slice(GameObject slicer, GameObject snakePartObj)
+    {
+        if (!effectOnSnake.givesInvincibility)
+        {
+            int indexForSlice = snakeParts.IndexOf(snakePartObj);
+
+            if (indexForSlice > 0)
+            {
+                for (int i = snakeParts.Count - 1; i > indexForSlice; i--)
+                {
+                    Destroy(snakeParts[i]);
+                    snakeParts.RemoveAt(i);
+                }
+                //score.text = snakeParts.Count.ToString();
+            }
+        }
+        else
+        {
+            Destroy(slicer);
+            GrowUp();
+        }
     }
 
     public void GrowUp()
@@ -114,7 +129,7 @@ public class Snake : MonoBehaviour
         {
             snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
         }
-        score.text = snakeParts.Count.ToString();
+        //score.text = snakeParts.Count.ToString();
     }
 
     private void GetEffect(AppleEffectData effect)
@@ -129,7 +144,7 @@ public class Snake : MonoBehaviour
             snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
         }
 
-        timerText.color = color;
+        //timerText.color = color;
     }
 
     private void SnakeMove()
@@ -173,11 +188,11 @@ public class Snake : MonoBehaviour
             if (Time.time >= timer + effectOnSnake.durationInSec)
             {
                 GetEffect(new AppleEffectData());
-                timerText.text = "";
+                //timerText.text = "";
                 return;
             }
 
-            timerText.text = (timer + effectOnSnake.durationInSec - Time.time).ToString();
+            //timerText.text = (timer + effectOnSnake.durationInSec - Time.time).ToString();
         }
     }
 }
