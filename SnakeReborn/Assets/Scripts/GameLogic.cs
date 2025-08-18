@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using UnityEngine.XR;
 
 public class GameLogic : MonoBehaviour
@@ -14,6 +15,8 @@ public class GameLogic : MonoBehaviour
     public GameObject slicerLaser;
     public float border;
     public int numOfSlicers;
+    public Button continueButton;
+    public GameObject Menu;
 
     private Camera cam;
     private Vector2 topLeft;
@@ -39,6 +42,8 @@ public class GameLogic : MonoBehaviour
         {
             GenLaser(slicerLaser);
         }
+
+        continueButton.onClick.AddListener(OnContinueClick);
     }
 
     void OnPause()
@@ -50,6 +55,16 @@ public class GameLogic : MonoBehaviour
         }
 
         GetComponentInChildren<Snake>().isPause = !GetComponentInChildren<Snake>().isPause;
+
+        //continueButton.SetAc
+        //Menu.Ac
+        
+        Menu.SetActive(!Menu.activeSelf);
+    }
+
+    void OnContinueClick()
+    {
+        OnPause();
     }
 
     public void DeleteObjectAbroad(GameObject gameObject)
@@ -74,7 +89,7 @@ public class GameLogic : MonoBehaviour
         x = UnityEngine.Random.Range(topLeft.x + border, bottomRight.x - border);
         y = UnityEngine.Random.Range(bottomRight.y + border, topLeft.y - border);
 
-        Instantiate(apple, new Vector2(x, y), Quaternion.identity);
+        Instantiate(apple, new Vector2(x, y), Quaternion.identity, transform);
     }
 
     Vector2 GenDir(GameObject obj)
@@ -109,5 +124,17 @@ public class GameLogic : MonoBehaviour
     void GenLaser(GameObject laser)
     {
         Instantiate(laser, GenDir(laser), Quaternion.identity, transform);
+    }
+
+    public void StartGame()
+    {
+        //snakePlayer = Instantiate(snakePlayer, new Vector2(0f, 0f), Quaternion.identity, transform);
+    }
+
+    public void GameOver()
+    {
+        //Destroy(snakePlayer);
+        OnPause();
+        //Menu.SetActive(!Menu.activeSelf);
     }
 }

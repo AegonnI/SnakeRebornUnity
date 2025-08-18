@@ -9,8 +9,15 @@ public class Apple : MonoBehaviour
         effect = GetRandomEffect();
 
         gameObject.GetComponent<SpriteRenderer>().color = effect.appleColor;
-        //Debug.Log(effect.effectName);
-        //print(effect.effectName);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        if (collider.gameObject.GetComponent<SnakePart>() && collider.gameObject.GetComponent<SnakePart>().isHead)
+        {
+            transform.parent.GetComponentInChildren<Snake>().Eat(this);
+            Destroy(gameObject);
+        }
     }
 
     public AppleEffectData GetRandomEffect()

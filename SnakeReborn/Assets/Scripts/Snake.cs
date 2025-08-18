@@ -54,31 +54,13 @@ public class Snake : MonoBehaviour
         }       
     }
 
-    public void OnChildTriggerEnter2D(Collider2D collider)
+    public void Eat(Apple apple)
     {
-        if (collider.gameObject.GetComponent<Apple>() != null)
+        appleEated();
+        if (apple.effect.effectName != new AppleEffectData().effectName)
         {
-            appleEated();
-            if (collider.gameObject.GetComponent<Apple>().effect.effectName != new AppleEffectData().effectName)
-            {
-                GetEffect(collider.gameObject.GetComponent<Apple>().effect);
-            }         
-            Destroy(collider.gameObject);
+            GetEffect(apple.effect);
         }
-    }
-    public void OnChildTriggerEnter2D(Collider2D collider, GameObject snakePartObj)
-    {
-        if (collider.gameObject.GetComponent<DeathLaser>())
-        {
-            Death();
-            Destroy(collider.gameObject);
-        }
-        if (collider.gameObject.GetComponent<SlicerLaser>())
-        {
-            Slice(collider.gameObject, snakePartObj);
-            //Destroy(collider.gameObject);
-        }
-        SnakePart.hasProcessed = true;
     }
 
     public void Death()
@@ -92,6 +74,8 @@ public class Snake : MonoBehaviour
             }
             snakeParts[0].transform.position = new Vector2();
             //score.text = snakeParts.Count.ToString();
+
+            //transform.parent.GetComponent<GameLogic>().GameOver();
         }
         else
         {
@@ -120,6 +104,7 @@ public class Snake : MonoBehaviour
             Destroy(slicer);
             GrowUp();
         }
+        SlicerLaser.hasProcessed = true;
     }
 
     public void GrowUp()
