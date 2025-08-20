@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.XR;
 
@@ -16,7 +17,12 @@ public class GameLogic : MonoBehaviour
     public float border;
     public int numOfSlicers;
     public Button continueButton;
+    public Button exitToMenuButton;
+    public Button exitButton;
     public GameObject Menu;
+
+    public TextMeshProUGUI score;
+    public TextMeshProUGUI timerText;
 
     private Camera cam;
     private Vector2 topLeft;
@@ -44,6 +50,7 @@ public class GameLogic : MonoBehaviour
         }
 
         continueButton.onClick.AddListener(OnContinueClick);
+        exitToMenuButton.onClick.AddListener(OnExitToMenuClick);
     }
 
     void OnPause()
@@ -65,6 +72,11 @@ public class GameLogic : MonoBehaviour
     void OnContinueClick()
     {
         OnPause();
+    }
+
+    void OnExitToMenuClick()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void DeleteObjectAbroad(GameObject gameObject)
@@ -124,6 +136,21 @@ public class GameLogic : MonoBehaviour
     void GenLaser(GameObject laser)
     {
         Instantiate(laser, GenDir(laser), Quaternion.identity, transform);
+    }
+
+    public void ChangeScore(string text)
+    {
+        score.text = text;
+    }
+
+    public void ChangeTimer(string text)
+    {
+        timerText.text = text;
+    }
+
+    public void ChangeTimer(Color color)
+    {
+        timerText.color = color;
     }
 
     public void StartGame()

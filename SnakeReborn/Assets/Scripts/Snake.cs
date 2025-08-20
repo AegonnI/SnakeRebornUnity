@@ -7,6 +7,7 @@ using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using static UnityEngine.GraphicsBuffer;
 
 public class Snake : MonoBehaviour
@@ -67,15 +68,22 @@ public class Snake : MonoBehaviour
     {
         if (!effectOnSnake.givesInvincibility)
         {
-            for (int i = snakeParts.Count - 1; i > 0; i--)
+            if (GameSattings.returnToMenuAfterDeath)
             {
-                Destroy(snakeParts[i]);
-                snakeParts.RemoveAt(i);
+                SceneManager.LoadScene("MainMenu");
             }
-            snakeParts[0].transform.position = new Vector2();
-            //score.text = snakeParts.Count.ToString();
+            else
+            {
+                for (int i = snakeParts.Count - 1; i > 0; i--)
+                {
+                    Destroy(snakeParts[i]);
+                    snakeParts.RemoveAt(i);
+                }
+                snakeParts[0].transform.position = new Vector2();
+                transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
 
-            //transform.parent.GetComponent<GameLogic>().GameOver();
+                //transform.parent.GetComponent<GameLogic>().GameOver();
+            }
         }
         else
         {
@@ -96,7 +104,7 @@ public class Snake : MonoBehaviour
                     Destroy(snakeParts[i]);
                     snakeParts.RemoveAt(i);
                 }
-                //score.text = snakeParts.Count.ToString();
+                transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
             }
         }
         else
@@ -114,7 +122,7 @@ public class Snake : MonoBehaviour
         {
             snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
         }
-        //score.text = snakeParts.Count.ToString();
+        transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
     }
 
     private void GetEffect(AppleEffectData effect)
@@ -128,8 +136,7 @@ public class Snake : MonoBehaviour
         {
             snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
         }
-
-        //timerText.color = color;
+        transform.parent.GetComponent<GameLogic>().ChangeTimer(color);
     }
 
     private void SnakeMove()
@@ -173,11 +180,10 @@ public class Snake : MonoBehaviour
             if (Time.time >= timer + effectOnSnake.durationInSec)
             {
                 GetEffect(new AppleEffectData());
-                //timerText.text = "";
+                transform.parent.GetComponent<GameLogic>().ChangeTimer("");
                 return;
             }
-
-            //timerText.text = (timer + effectOnSnake.durationInSec - Time.time).ToString();
+            transform.parent.GetComponent<GameLogic>().ChangeTimer((timer + effectOnSnake.durationInSec - Time.time).ToString());
         }
     }
 }
