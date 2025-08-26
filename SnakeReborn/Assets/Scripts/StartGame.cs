@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEditor;
 using UnityEditor.SearchService;
 using UnityEngine;
@@ -11,7 +12,9 @@ public class StartGame : MonoBehaviour
     public GameObject SettingsMenu;
 
     public Toggle returnToMenuAfterDeath;
-    
+
+    public TextMeshProUGUI highScoreText;
+
     void Start()
     {
         startGameButton.onClick.AddListener(OnStartGameClick);
@@ -19,6 +22,8 @@ public class StartGame : MonoBehaviour
         returnToMenuAfterDeath.onValueChanged.AddListener(OnReturnToMenuAfterDeathTogglehanged);
 
         GameSattings.returnToMenuAfterDeath = returnToMenuAfterDeath.isOn;
+
+        
     }
 
     public void OnStartGameClick()

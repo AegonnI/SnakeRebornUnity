@@ -18,8 +18,8 @@ public class Snake : MonoBehaviour
     public event Action appleEated;
     public bool isPause;
 
-    public TextMeshProUGUI score;
-    public TextMeshProUGUI timerText;
+    //public TextMeshProUGUI score;
+    //public TextMeshProUGUI timerText;
 
     private float speedFactor;
     private List<GameObject> snakeParts;
