@@ -1,9 +1,13 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Score : MonoBehaviour
 {
     public static int record;
-    public static int score;
+    public static int score = 0;
+
+    public static event Action<int> OnScoreChanged;
 
     void Start()
     {
@@ -15,9 +19,18 @@ public class Score : MonoBehaviour
         SaveRecord(record);
     }
 
-    public static void AddScore(int count)
+    public static void AddScore(int delta)
     {
-        score += count;
+        score += delta;
+        //OnScoreChanged(score);
+        Debug.Log(score);
+    }
+
+    public static void SetScore(int count)
+    {
+        score = count;
+        //OnScoreChanged(score);
+        Debug.Log(score);
     }
 
     public int LoadRecord()

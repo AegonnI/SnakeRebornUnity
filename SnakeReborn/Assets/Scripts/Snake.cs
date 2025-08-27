@@ -27,6 +27,8 @@ public class Snake : MonoBehaviour
 
     private float timer;
 
+    public int partsPerApple = 5;
+
 
     void Start()
     {
@@ -81,6 +83,7 @@ public class Snake : MonoBehaviour
                 }
                 snakeParts[0].transform.position = new Vector2();
                 transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
+                Score.SetScore(0);
 
                 //transform.parent.GetComponent<GameLogic>().GameOver();
             }
@@ -105,6 +108,7 @@ public class Snake : MonoBehaviour
                     snakeParts.RemoveAt(i);
                 }
                 transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
+                Score.SetScore(snakeParts.Count);
             }
         }
         else
@@ -118,11 +122,13 @@ public class Snake : MonoBehaviour
     public void GrowUp()
     {
         snakePart.gameObject.GetComponent<SpriteRenderer>().color = effectOnSnake.snakeColor;
-        for (int i = 0; i < 5; i++) 
+        for (int i = 0; i < partsPerApple; i++) 
         {
             snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
         }
         transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
+        Score.AddScore(partsPerApple);
+
     }
 
     private void GetEffect(AppleEffectData effect)
