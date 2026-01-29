@@ -7,6 +7,7 @@ public class Apple : MonoBehaviour
     private void Start()
     {
         effect = GetRandomEffect();
+        NNDecisionMaker.appleEffect = effect;
 
         gameObject.GetComponent<SpriteRenderer>().color = effect.appleColor;
     }

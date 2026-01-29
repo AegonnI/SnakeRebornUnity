@@ -12,6 +12,7 @@ public class StartGame : MonoBehaviour
     public GameObject SettingsMenu;
 
     public Toggle returnToMenuAfterDeath;
+    public Toggle useNNplayer;
 
     public TextMeshProUGUI highScoreText;
 
@@ -20,6 +21,7 @@ public class StartGame : MonoBehaviour
         startGameButton.onClick.AddListener(OnStartGameClick);
         settingsButton.onClick.AddListener(OnSettingsClick);
         returnToMenuAfterDeath.onValueChanged.AddListener(OnReturnToMenuAfterDeathTogglehanged);
+        useNNplayer.onValueChanged.AddListener(UseNNPlayerTogglehanged);
 
         GameSattings.returnToMenuAfterDeath = returnToMenuAfterDeath.isOn;
 
@@ -39,5 +41,9 @@ public class StartGame : MonoBehaviour
     public void OnReturnToMenuAfterDeathTogglehanged(bool state)
     {
         GameSattings.returnToMenuAfterDeath = state;
+    }
+    public void UseNNPlayerTogglehanged(bool state)
+    {
+        GameSattings.useNNPlayer = state;
     }
 }

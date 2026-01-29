@@ -102,6 +102,8 @@ public class GameLogic : MonoBehaviour
         x = UnityEngine.Random.Range(topLeft.x + border, bottomRight.x - border);
         y = UnityEngine.Random.Range(bottomRight.y + border, topLeft.y - border);
 
+        NNDecisionMaker.AppleCoords = new Vector2(x, y);
+
         Instantiate(apple, new Vector2(x, y), Quaternion.identity, transform);
     }
 

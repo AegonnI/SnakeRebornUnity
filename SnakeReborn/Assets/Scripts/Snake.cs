@@ -147,7 +147,17 @@ public class Snake : MonoBehaviour
 
     private void SnakeMove()
     {
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mousePosition = new Vector2();
+
+        if (GameSattings.useNNPlayer) 
+        {
+            mousePosition = NNDecisionMaker.MakeDecision(); 
+        }
+        else 
+        { 
+            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition); 
+        }
+            
 
         if (snakeParts.Count > 1)
         {
