@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 0.17221434
       objectReference: {fileID: 0}
+    - target: {fileID: 6697400222938544017, guid: 86a80944eccaf0d428045f428d2a5a6a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 168a7468278edcd4d869a1a40953efe5, type: 2}
     - target: {fileID: 7156497735239321401, guid: 86a80944eccaf0d428045f428d2a5a6a, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -103,3 +107,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   dir: {x: 0, y: 1}
+  isPause: 0
+  isTimeStop: 0

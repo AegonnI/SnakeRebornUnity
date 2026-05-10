@@ -16,6 +16,7 @@ public class Snake : MonoBehaviour
     public float speed;
     public float fractionOfDistancePerSecond;
     public event Action appleEated;
+    public event Action timeStoped;
     public bool isPause;
 
     //public TextMeshProUGUI score;
@@ -133,6 +134,11 @@ public class Snake : MonoBehaviour
 
     private void GetEffect(AppleEffectData effect)
     {
+        if (effectOnSnake.effectName == "TimeStop" ^ effect.effectName == "TimeStop")
+        {
+            timeStoped();
+        }
+
         effectOnSnake = effect;
 
         timer = Time.time;
@@ -158,7 +164,6 @@ public class Snake : MonoBehaviour
             mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition); 
         }
             
-
         if (snakeParts.Count > 1)
         {
             snakeParts.Insert(1, snakeParts[^1]);
@@ -199,7 +204,16 @@ public class Snake : MonoBehaviour
                 transform.parent.GetComponent<GameLogic>().ChangeTimer("");
                 return;
             }
-            transform.parent.GetComponent<GameLogic>().ChangeTimer((timer + effectOnSnake.durationInSec - Time.time).ToString());
+            transform.parent.GetComponent<GameLogic>().ChangeTimer((timer + effectOnSnake.durationInSec - Time.time).ToString("F2"));
+
+            float a = (float)((Time.time - timer) / (effectOnSnake.durationInSec));
+                
+            Color color = new Color(1, 1, 1) * a + effectOnSnake.snakeColor * (1 - a);
+            for (int i = 0; i < snakeParts.Count; i++)
+            {
+                snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
+            }
+            transform.parent.GetComponent<GameLogic>().ChangeTimer(color);
         }
     }
 }

@@ -4,6 +4,7 @@ public class AppleEffectData
 {
     public string effectName;       // для отладки/UI
     public bool givesInvincibility;
+    public bool stopsTime;
     public float speedMultiplier;
     public float durationInSec;
     public Color appleColor;
@@ -16,6 +17,7 @@ public class AppleEffectData
     {
         effectName = "Without Effects";
         givesInvincibility = false;
+        stopsTime = false;
         speedMultiplier = 1f;
         durationInSec = -1f;
         weight = 1f;

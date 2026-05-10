@@ -33,6 +33,14 @@ public class AppleEffectManager : MonoBehaviour
         effects[^1].appleColor = Color.gold;
         effects[^1].snakeColor = Color.gold;
 
+        effects.Add(new AppleEffectData());
+        effects[^1].effectName = "TimeStop";
+        effects[^1].stopsTime = true;
+        effects[^1].durationInSec = 4.0f;
+        effects[^1].weight = 0.025f;
+        effects[^1].appleColor = Color.cyan;
+        effects[^1].snakeColor = Color.cyan;
+
         foreach (AppleEffectData data in effects)
         {
             sumOfWeights += data.weight;

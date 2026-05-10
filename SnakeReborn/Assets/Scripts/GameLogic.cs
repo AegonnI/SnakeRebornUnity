@@ -42,6 +42,7 @@ public class GameLogic : MonoBehaviour
         snakePlayer = Instantiate(snakePlayer, new Vector2(0f, 0f), Quaternion.identity, transform);
 
         snakePlayer.GetComponent<Snake>().appleEated += GenApple;
+        snakePlayer.GetComponent<Snake>().timeStoped += InTimeStop;
 
         GenApple();
         GenLaser(deathLaser);
@@ -54,6 +55,17 @@ public class GameLogic : MonoBehaviour
         exitToMenuButton.onClick.AddListener(OnExitToMenuClick);
     }
 
+    void InTimeStop()
+    {
+        Debug.Log("TimeStop");
+        Laser[] lasers = GetComponentsInChildren<Laser>();
+        foreach (var laser in lasers)
+        {
+            Debug.Log("isTomeStop now: " + laser.isTimeStop);
+            laser.isTimeStop = !laser.isTimeStop;
+        }
+    }
+
     void OnPause()
     {
         Laser[] lasers = GetComponentsInChildren<Laser>();
@@ -63,9 +75,6 @@ public class GameLogic : MonoBehaviour
         }
 
         GetComponentInChildren<Snake>().isPause = !GetComponentInChildren<Snake>().isPause;
-
-        //continueButton.SetAc
-        //Menu.Ac
         
         Menu.SetActive(!Menu.activeSelf);
     }
@@ -82,13 +91,18 @@ public class GameLogic : MonoBehaviour
 
     public void DeleteObjectAbroad(GameObject gameObject)
     {
+        bool isDeath = gameObject.GetComponent<DeathLaser>() != null;
+        bool isSlicer = gameObject.GetComponent<SlicerLaser>() != null;
+
         Destroy(gameObject);
-        if (gameObject.GetComponent<DeathLaser>())
+
+
+        if (isDeath)
         {
             GenLaser(deathLaser);
             return;
         }
-        if (gameObject.GetComponent<SlicerLaser>())
+        if (isSlicer)
         {
             GenLaser(slicerLaser);
             return;
