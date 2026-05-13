@@ -16,6 +16,10 @@ public class Apple : MonoBehaviour
     {
         if (collider.gameObject.GetComponent<SnakePart>() && collider.gameObject.GetComponent<SnakePart>().isHead)
         {
+            var sr = GetComponent<SpriteRenderer>();
+            Vector2 p = collider.ClosestPoint(transform.position);
+            Color sparkColor = effect != null ? effect.appleColor : (sr != null ? sr.color : Color.red);
+            ImpactSparks.BurstAt(p, sparkColor, transform.parent);
             transform.parent.GetComponentInChildren<Snake>().Eat(this);
             Destroy(gameObject);
         }

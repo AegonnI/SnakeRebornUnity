@@ -1,14 +1,7 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using TMPro;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using static UnityEngine.GraphicsBuffer;
 
 public class Snake : MonoBehaviour
 {
@@ -19,9 +12,6 @@ public class Snake : MonoBehaviour
     public event Action timeStoped;
     public bool isPause;
 
-    //public TextMeshProUGUI score;
-    //public TextMeshProUGUI timerText;
-
     private float speedFactor;
     private List<GameObject> snakeParts;
     private AppleEffectData effectOnSnake;
@@ -30,15 +20,20 @@ public class Snake : MonoBehaviour
 
     public int partsPerApple = 5;
 
+    private GameLogic _gameLogic;
+    private Camera _cam;
 
     void Start()
     {
         effectOnSnake = new AppleEffectData();
-        
+
         appleEated += GrowUp;
-        
+
         speedFactor = 70f / speed;
-        
+
+        _gameLogic = transform.parent != null ? transform.parent.GetComponent<GameLogic>() : null;
+        _cam = Camera.main;
+
         snakeParts = new List<GameObject>();
         snakePart.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
         snakePart.GetComponent<SnakePart>().isHead = true;
@@ -46,7 +41,6 @@ public class Snake : MonoBehaviour
         snakePart.GetComponent<SnakePart>().isHead = false;
 
         isPause = false;
-
     }
 
     void Update()
@@ -55,16 +49,14 @@ public class Snake : MonoBehaviour
         {
             SnakeMove();
             CheckAndExpireEffect();
-        }       
+        }
     }
 
     public void Eat(Apple apple)
     {
         appleEated();
         if (apple.effect.effectName != new AppleEffectData().effectName)
-        {
             GetEffect(apple.effect);
-        }
     }
 
     public void Death()
@@ -83,32 +75,56 @@ public class Snake : MonoBehaviour
                     snakeParts.RemoveAt(i);
                 }
                 snakeParts[0].transform.position = new Vector2();
-                transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
+                if (_gameLogic != null)
+                    _gameLogic.ChangeScore(snakeParts.Count.ToString());
                 Score.SetScore(0);
-
-                //transform.parent.GetComponent<GameLogic>().GameOver();
             }
         }
         else
-        {
             GrowUp();
-        }
     }
 
     public void Slice(GameObject slicer, GameObject snakePartObj)
     {
+        var slicerSr = slicer != null ? slicer.GetComponent<SpriteRenderer>() : null;
+        Color sparkCol = slicerSr != null ? slicerSr.color : new Color(1f, 0.4f, 0.55f);
+        Vector2 sparkPos = snakePartObj.transform.position;
+        if (slicer != null && slicer.TryGetComponent(out Collider2D slab))
+            sparkPos = slab.ClosestPoint(snakePartObj.transform.position);
+        ImpactSparks.BurstAt(sparkPos, sparkCol, _gameLogic != null ? _gameLogic.transform : null);
+
         if (!effectOnSnake.givesInvincibility)
         {
             int indexForSlice = snakeParts.IndexOf(snakePartObj);
 
             if (indexForSlice > 0)
             {
+                var detached = new List<GameObject>();
                 for (int i = snakeParts.Count - 1; i > indexForSlice; i--)
                 {
-                    Destroy(snakeParts[i]);
+                    detached.Add(snakeParts[i]);
                     snakeParts.RemoveAt(i);
                 }
-                transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
+
+                Transform vfxRoot = _gameLogic != null ? _gameLogic.transform : transform.parent;
+                Vector2 headPos = snakeParts[0].transform.position;
+                Vector2 outward = ((Vector2)snakePartObj.transform.position - headPos);
+                if (outward.sqrMagnitude < 0.01f)
+                    outward = UnityEngine.Random.insideUnitCircle.normalized;
+                outward.Normalize();
+
+                for (int i = 0; i < detached.Count; i++)
+                {
+                    var go = detached[i];
+                    go.transform.SetParent(vfxRoot, true);
+                    foreach (var col in go.GetComponents<Collider2D>())
+                        col.enabled = false;
+                    var fade = go.AddComponent<DetachedSegmentFade>();
+                    fade.Begin(outward * (1.4f + i * 0.12f) + Vector2.Perpendicular(outward) * UnityEngine.Random.Range(-0.6f, 0.6f));
+                }
+
+                if (_gameLogic != null)
+                    _gameLogic.ChangeScore(snakeParts.Count.ToString());
                 Score.SetScore(snakeParts.Count);
             }
         }
@@ -123,21 +139,17 @@ public class Snake : MonoBehaviour
     public void GrowUp()
     {
         snakePart.gameObject.GetComponent<SpriteRenderer>().color = effectOnSnake.snakeColor;
-        for (int i = 0; i < partsPerApple; i++) 
-        {
+        for (int i = 0; i < partsPerApple; i++)
             snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
-        }
-        transform.parent.GetComponent<GameLogic>().ChangeScore(snakeParts.Count.ToString());
+        if (_gameLogic != null)
+            _gameLogic.ChangeScore(snakeParts.Count.ToString());
         Score.AddScore(partsPerApple);
-
     }
 
     private void GetEffect(AppleEffectData effect)
     {
         if (effectOnSnake.effectName == "TimeStop" ^ effect.effectName == "TimeStop")
-        {
             timeStoped();
-        }
 
         effectOnSnake = effect;
 
@@ -145,25 +157,24 @@ public class Snake : MonoBehaviour
 
         Color color = effectOnSnake.snakeColor;
         for (int i = 0; i < snakeParts.Count; i++)
-        {
             snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
-        }
-        transform.parent.GetComponent<GameLogic>().ChangeTimer(color);
+        if (_gameLogic != null)
+            _gameLogic.ChangeTimer(color);
     }
 
     private void SnakeMove()
     {
-        Vector2 mousePosition = new Vector2();
+        Vector2 mousePosition;
 
-        if (GameSattings.useNNPlayer) 
+        if (GameSattings.useNNPlayer)
+            mousePosition = NNDecisionMaker.MakeDecision();
+        else
         {
-            mousePosition = NNDecisionMaker.MakeDecision(); 
+            if (_cam == null)
+                _cam = Camera.main;
+            mousePosition = _cam != null ? _cam.ScreenToWorldPoint(Input.mousePosition) : Vector2.zero;
         }
-        else 
-        { 
-            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition); 
-        }
-            
+
         if (snakeParts.Count > 1)
         {
             snakeParts.Insert(1, snakeParts[^1]);
@@ -183,15 +194,6 @@ public class Snake : MonoBehaviour
 
         float t = 1f - Mathf.Pow(1f - F, Time.deltaTime);
         snakeParts[0].transform.position = (Vector2)((1 - t) * snakeParts[0].transform.position) + t * mousePosition;
-
-        //float newSpeedFactor = speedFactor / effectOnSnake.speedMultiplier;
-        //snakeParts[0].transform.position = (mousePosition + (newSpeedFactor - 1f) * (Vector2)snakeParts[0].transform.position) / newSpeedFactor;
-
-        //float fractionPerSecond = newSpeedFactor;
-        //float perFrame = 1f - Mathf.Pow(1f - fractionPerSecond, Time.deltaTime);
-        //snakeParts[0].transform.position = Vector2.Lerp(snakeParts[0].transform.position, mousePosition, perFrame);
-
-        //snakeParts[0].transform.position = (1-Time.deltaTime*)
     }
 
     private void CheckAndExpireEffect()
@@ -201,19 +203,20 @@ public class Snake : MonoBehaviour
             if (Time.time >= timer + effectOnSnake.durationInSec)
             {
                 GetEffect(new AppleEffectData());
-                transform.parent.GetComponent<GameLogic>().ChangeTimer("");
+                if (_gameLogic != null)
+                    _gameLogic.ChangeTimer("");
                 return;
             }
-            transform.parent.GetComponent<GameLogic>().ChangeTimer((timer + effectOnSnake.durationInSec - Time.time).ToString("F2"));
+            if (_gameLogic != null)
+                _gameLogic.ChangeTimer((timer + effectOnSnake.durationInSec - Time.time).ToString("F2"));
 
-            float a = (float)((Time.time - timer) / (effectOnSnake.durationInSec));
-                
+            float a = (float)((Time.time - timer) / effectOnSnake.durationInSec);
+
             Color color = new Color(1, 1, 1) * a + effectOnSnake.snakeColor * (1 - a);
             for (int i = 0; i < snakeParts.Count; i++)
-            {
                 snakeParts[i].gameObject.GetComponent<SpriteRenderer>().color = color;
-            }
-            transform.parent.GetComponent<GameLogic>().ChangeTimer(color);
+            if (_gameLogic != null)
+                _gameLogic.ChangeTimer(color);
         }
     }
 }

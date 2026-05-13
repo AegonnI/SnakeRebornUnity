@@ -13,6 +13,9 @@ public class Laser : MonoBehaviour
         transform.right = dir;
         isPause = false;
         isDying = false;
+        var gl = transform.parent != null ? transform.parent.GetComponent<GameLogic>() : null;
+        if (gl != null)
+            isTimeStop = gl.LaserTimeStopActive;
     }
 
     void Update()

@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
+using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.XR;
 
 public class GameLogic : MonoBehaviour
 {
@@ -25,11 +20,38 @@ public class GameLogic : MonoBehaviour
     public TextMeshProUGUI score;
     public TextMeshProUGUI timerText;
 
+    [Header("Laser telegraph")]
+    public float laserTelegraphDuration = 0.55f;
+    public AnimationCurve telegraphWidthMultiplier = AnimationCurve.Linear(0f, 0.35f, 1f, 1.15f);
+    public Material telegraphLineMaterial;
+    public Color deathTelegraphEdge = new Color(0.35f, 1f, 0.7f, 0.95f);
+    public Color deathTelegraphCore = new Color(0.1f, 0.35f, 0.25f, 0f);
+    public Color slicerTelegraphEdge = new Color(1f, 0.4f, 0.55f, 0.95f);
+    public Color slicerTelegraphCore = new Color(0.4f, 0.1f, 0.18f, 0f);
+
     private Camera cam;
     private Vector2 topLeft;
     private Vector2 bottomRight;
 
-    //private List<GameObject> lasers;
+    /// <summary>Global time-stop for lasers; new lasers read this when spawned.</summary>
+    bool _laserTimeStopGlobal;
+
+    public bool LaserTimeStopActive => _laserTimeStopGlobal;
+
+    LaserSpawnCoroutineHost _laserSpawnHost;
+
+    void Awake()
+    {
+        var hostGo = new GameObject("~LaserSpawnCoroutineHost");
+        hostGo.transform.SetParent(null);
+        _laserSpawnHost = hostGo.AddComponent<LaserSpawnCoroutineHost>();
+    }
+
+    void OnDestroy()
+    {
+        if (_laserSpawnHost != null)
+            Destroy(_laserSpawnHost.gameObject);
+    }
 
     void Start()
     {
@@ -47,9 +69,7 @@ public class GameLogic : MonoBehaviour
         GenApple();
         GenLaser(deathLaser);
         for (int i = 0; i < numOfSlicers; i++)
-        {
             GenLaser(slicerLaser);
-        }
 
         continueButton.onClick.AddListener(OnContinueClick);
         exitToMenuButton.onClick.AddListener(OnExitToMenuClick);
@@ -57,25 +77,19 @@ public class GameLogic : MonoBehaviour
 
     void InTimeStop()
     {
-        Debug.Log("TimeStop");
-        Laser[] lasers = GetComponentsInChildren<Laser>();
-        foreach (var laser in lasers)
-        {
-            Debug.Log("isTomeStop now: " + laser.isTimeStop);
-            laser.isTimeStop = !laser.isTimeStop;
-        }
+        _laserTimeStopGlobal = !_laserTimeStopGlobal;
+        foreach (var laser in GetComponentsInChildren<Laser>(true))
+            laser.isTimeStop = _laserTimeStopGlobal;
     }
 
     void OnPause()
     {
         Laser[] lasers = GetComponentsInChildren<Laser>();
         foreach (var laser in lasers)
-        {
             laser.isPause = !laser.isPause;
-        }
 
         GetComponentInChildren<Snake>().isPause = !GetComponentInChildren<Snake>().isPause;
-        
+
         Menu.SetActive(!Menu.activeSelf);
     }
 
@@ -96,7 +110,6 @@ public class GameLogic : MonoBehaviour
 
         Destroy(gameObject);
 
-
         if (isDeath)
         {
             GenLaser(deathLaser);
@@ -105,54 +118,137 @@ public class GameLogic : MonoBehaviour
         if (isSlicer)
         {
             GenLaser(slicerLaser);
-            return;
         }
     }
 
     void GenApple()
     {
-        float x, y;
-
-        x = UnityEngine.Random.Range(topLeft.x + border, bottomRight.x - border);
-        y = UnityEngine.Random.Range(bottomRight.y + border, topLeft.y - border);
+        float x = Random.Range(topLeft.x + border, bottomRight.x - border);
+        float y = Random.Range(bottomRight.y + border, topLeft.y - border);
 
         NNDecisionMaker.AppleCoords = new Vector2(x, y);
 
         Instantiate(apple, new Vector2(x, y), Quaternion.identity, transform);
     }
 
-    Vector2 GenDir(GameObject obj)
+    void GetLaserSpawn(out Vector2 startPos, out Vector2 dir)
     {
-        Vector2 startPos = new Vector2();
-
-        int randdir = new System.Random().Next(0, 3);
-        if (randdir == 0) // слева направо
+        int randdir = Random.Range(0, 4);
+        if (randdir == 0)
         {
-            obj.GetComponent<Laser>().dir = new Vector2(1f, 0f);
-            startPos = new Vector2(topLeft.x, UnityEngine.Random.Range(bottomRight.y + border, topLeft.y - border));
+            dir = new Vector2(1f, 0f);
+            startPos = new Vector2(topLeft.x, Random.Range(bottomRight.y + border, topLeft.y - border));
         }
-        else if (randdir == 1) // справа налево
+        else if (randdir == 1)
         {
-            obj.GetComponent<Laser>().dir = new Vector2(-1f, 0f);
-            startPos = new Vector2(bottomRight.x, UnityEngine.Random.Range(bottomRight.y + border, topLeft.y - border));
+            dir = new Vector2(-1f, 0f);
+            startPos = new Vector2(bottomRight.x, Random.Range(bottomRight.y + border, topLeft.y - border));
         }
-        else if (randdir == 2) // снизу вверх
+        else if (randdir == 2)
         {
-            obj.GetComponent<Laser>().dir = new Vector2(0f, 1f);
-            startPos = new Vector2(UnityEngine.Random.Range(topLeft.x + border, bottomRight.x - border), bottomRight.y);
+            dir = new Vector2(0f, 1f);
+            startPos = new Vector2(Random.Range(topLeft.x + border, bottomRight.x - border), bottomRight.y);
         }
-        else // сверху вниз
+        else
         {
-            obj.GetComponent<Laser>().dir = new Vector2(0f, -1f);
-            startPos = new Vector2(UnityEngine.Random.Range(topLeft.x + border, bottomRight.x - border), topLeft.y);
+            dir = new Vector2(0f, -1f);
+            startPos = new Vector2(Random.Range(topLeft.x + border, bottomRight.x - border), topLeft.y);
         }
-
-        return startPos;
     }
 
-    void GenLaser(GameObject laser)
+    static Vector2 ComputeLaserLineEnd(Vector2 start, Vector2 dir, Vector2 tl, Vector2 br, float pad = 4f)
     {
-        Instantiate(laser, GenDir(laser), Quaternion.identity, transform);
+        if (dir.x > 0.5f)
+            return new Vector2(br.x + pad, start.y);
+        if (dir.x < -0.5f)
+            return new Vector2(tl.x - pad, start.y);
+        if (dir.y > 0.5f)
+            return new Vector2(start.x, tl.y + pad);
+        return new Vector2(start.x, br.y - pad);
+    }
+
+    void GenLaser(GameObject laserPrefab)
+    {
+        GetLaserSpawn(out Vector2 startPos, out Vector2 dir);
+        bool isDeath = laserPrefab.GetComponent<DeathLaser>() != null;
+        Color edge = isDeath ? deathTelegraphEdge : slicerTelegraphEdge;
+        Color core = isDeath ? deathTelegraphCore : slicerTelegraphCore;
+        if (_laserSpawnHost != null && _laserSpawnHost.gameObject.activeInHierarchy)
+            _laserSpawnHost.StartCoroutine(SpawnLaserAfterTelegraph(laserPrefab, startPos, dir, edge, core));
+        else
+            SpawnLaserImmediate(laserPrefab, startPos, dir);
+    }
+
+    void SpawnLaserImmediate(GameObject laserPrefab, Vector2 startPos, Vector2 dir)
+    {
+        var instance = Instantiate(laserPrefab, startPos, Quaternion.identity, transform);
+        var las = instance.GetComponent<Laser>();
+        if (las != null)
+        {
+            las.dir = dir;
+            las.isTimeStop = _laserTimeStopGlobal;
+        }
+    }
+
+    IEnumerator SpawnLaserAfterTelegraph(GameObject laserPrefab, Vector2 startPos, Vector2 dir, Color edge, Color core)
+    {
+        Vector2 endPos = ComputeLaserLineEnd(startPos, dir, topLeft, bottomRight);
+        var teleGo = new GameObject("LaserTelegraph");
+        teleGo.transform.SetParent(transform, false);
+        var lr = teleGo.AddComponent<LineRenderer>();
+        lr.positionCount = 2;
+        lr.useWorldSpace = true;
+        lr.sortingOrder = 8;
+        lr.numCapVertices = 4;
+        lr.numCornerVertices = 2;
+
+        Material mat = telegraphLineMaterial;
+        if (mat == null)
+        {
+            Shader sh = Shader.Find("Sprites/Default");
+            if (sh == null)
+                sh = Shader.Find("Unlit/Color");
+            if (sh != null)
+                mat = new Material(sh);
+        }
+        if (mat != null)
+            lr.material = mat;
+
+        var grad = new Gradient();
+        grad.SetKeys(
+            new[]
+            {
+                new GradientColorKey(edge, 0f),
+                new GradientColorKey(Color.Lerp(edge, core, 0.5f), 0.5f),
+                new GradientColorKey(core, 1f)
+            },
+            new[]
+            {
+                new GradientAlphaKey(edge.a, 0f),
+                new GradientAlphaKey(Mathf.Lerp(edge.a, core.a, 0.5f), 0.5f),
+                new GradientAlphaKey(core.a, 1f)
+            });
+        lr.colorGradient = grad;
+
+        Snake snake = snakePlayer != null ? snakePlayer.GetComponent<Snake>() : null;
+
+        float acc = 0f;
+        float duration = Mathf.Max(0.05f, laserTelegraphDuration);
+        while (acc < duration)
+        {
+            if (snake == null || !snake.isPause)
+                acc += Time.deltaTime;
+            float u = Mathf.Clamp01(acc / duration);
+            lr.SetPosition(0, startPos);
+            lr.SetPosition(1, endPos);
+            float wMul = telegraphWidthMultiplier != null ? telegraphWidthMultiplier.Evaluate(u) : 1f;
+            lr.startWidth = 0.07f * wMul;
+            lr.endWidth = 0.2f * wMul;
+            yield return null;
+        }
+
+        SpawnLaserImmediate(laserPrefab, startPos, dir);
+        Destroy(teleGo);
     }
 
     public void ChangeScore(string text)
@@ -172,13 +268,13 @@ public class GameLogic : MonoBehaviour
 
     public void StartGame()
     {
-        //snakePlayer = Instantiate(snakePlayer, new Vector2(0f, 0f), Quaternion.identity, transform);
     }
 
     public void GameOver()
     {
-        //Destroy(snakePlayer);
         OnPause();
-        //Menu.SetActive(!Menu.activeSelf);
     }
 }
+
+/// <summary>Coroutine host at scene root so spawn coroutines work when Main Camera / GameLogic is inactive.</summary>
+public sealed class LaserSpawnCoroutineHost : MonoBehaviour { }
