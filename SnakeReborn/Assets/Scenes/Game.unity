@@ -464,30 +464,30 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 0.35
-      inSlope: 0
-      outSlope: 0.79999995
-      tangentMode: 0
+      time: 0.00076293945
+      value: 0.03805542
+      inSlope: 0.60015625
+      outSlope: 0.60015625
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.33333334
     - serializedVersion: 3
-      time: 1
-      value: 1.15
-      inSlope: 0.79999995
-      outSlope: 0
-      tangentMode: 0
+      time: 1.0016632
+      value: 0.638752
+      inSlope: 0.60015625
+      outSlope: 0.60015625
+      tangentMode: 34
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.33333334
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   telegraphLineMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
-  deathTelegraphEdge: {r: 0.34901965, g: 1, b: 0.4263095, a: 0.95}
+  deathTelegraphEdge: {r: 0.34901965, g: 1, b: 0.4263095, a: 0.5019608}
   deathTelegraphCore: {r: 0.101960786, g: 0.34901962, b: 0.13024858, a: 0}
-  slicerTelegraphEdge: {r: 0.41975504, g: 0.39999998, b: 1, a: 0.95}
+  slicerTelegraphEdge: {r: 0.41975504, g: 0.39999998, b: 1, a: 0.5019608}
   slicerTelegraphCore: {r: 0.10196078, g: 0.12899251, b: 0.4, a: 0}
 --- !u!114 &519420034
 MonoBehaviour:
