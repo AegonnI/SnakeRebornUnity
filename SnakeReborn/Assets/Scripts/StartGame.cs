@@ -10,6 +10,7 @@ public class StartGame : MonoBehaviour
     public Button startGameButton;
     public Button settingsButton;
     public GameObject SettingsMenu;
+    public Button exitButton;
 
     public Toggle returnToMenuAfterDeath;
     public Toggle useNNplayer;
@@ -20,12 +21,13 @@ public class StartGame : MonoBehaviour
     {
         startGameButton.onClick.AddListener(OnStartGameClick);
         settingsButton.onClick.AddListener(OnSettingsClick);
+        exitButton.onClick.AddListener(OnExitClick);
         returnToMenuAfterDeath.onValueChanged.AddListener(OnReturnToMenuAfterDeathTogglehanged);
         useNNplayer.onValueChanged.AddListener(UseNNPlayerTogglehanged);
 
         GameSattings.returnToMenuAfterDeath = returnToMenuAfterDeath.isOn;
 
-        
+        SettingsMenu.SetActive(false);
     }
 
     public void OnStartGameClick()
@@ -36,6 +38,17 @@ public class StartGame : MonoBehaviour
     public void OnSettingsClick()
     {
         SettingsMenu.SetActive(!SettingsMenu.activeSelf);
+    }
+
+    public static void OnExitClick()
+    {
+        // Для работы кнопки в редакторе Unity
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #else
+                // Для работы в собранном билде на ПК и смартфонах
+                Application.Quit();
+        #endif
     }
 
     public void OnReturnToMenuAfterDeathTogglehanged(bool state)

@@ -8,6 +8,11 @@ public class Laser : MonoBehaviour
     public bool isTimeStop;
     private bool isDying;
 
+    public float stopTimeStart;
+    private float stoppingDurationInSec = 0.5f;
+    // Статическое поле для отслеживания закрытия приложения
+    private static bool isAppQuitting = false;
+
     void Start()
     {
         transform.right = dir;
@@ -20,15 +25,35 @@ public class Laser : MonoBehaviour
 
     void Update()
     {
-        transform.position = (Vector2)transform.position + dir * Time.deltaTime * ((isPause || isTimeStop ? 0f : 1f) * speed);
+        transform.position = (Vector2)transform.position + dir * Time.deltaTime * ((isPause ? 0f : 1f) * (isTimeStop ? Mathf.Clamp01(1 - (Time.time - stopTimeStart) / stoppingDurationInSec) : 1f) * speed);
+    }
+
+    void OnApplicationQuit()
+    {
+        isAppQuitting = true;
     }
 
     private void OnBecameInvisible()
     {
+        // 1. Не выполняем логику, если приложение закрывается
+        if (isAppQuitting)
+            return;
+
+        // 2. Не выполняем логику, если сцена уже выгружается
+        if (gameObject.scene.isLoaded == false)
+            return;
+
         if (!isDying)
         {
             isDying = true;
-            transform.parent.gameObject.GetComponent<GameLogic>().DeleteObjectAbroad(gameObject);
+
+            var gl = transform.parent.GetComponent<GameLogic>();
+
+            // 3. Проверяем, что GameLogic существует и не уничтожается в данный момент
+            if (gl != null && !gl.IsShuttingDown)
+            {
+                gl.DeleteObjectAbroad(gameObject);
+            }
         }
     }
 }

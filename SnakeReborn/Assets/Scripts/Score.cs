@@ -1,17 +1,25 @@
 using System;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class Score : MonoBehaviour
 {
-    public static int record;
+    public static int record = 0;
     public static int score = 0;
 
     public static event Action<int> OnScoreChanged;
 
+    public TextMeshProUGUI highScoreText;
+
     void Start()
     {
-        record = LoadRecord();
+        Debug.Log(record);
+        if (record == 0)
+        {
+            record = LoadRecord();
+        }      
+        highScoreText.text = "High Score: " + record.ToString();
     }
 
     void OnApplicationQuit()
@@ -38,7 +46,7 @@ public class Score : MonoBehaviour
         return PlayerPrefs.GetInt("HighScore", 0); // 0 по умолчанию
     }
 
-    public void SaveRecord(int score)
+    public static void SaveRecord(int score)
     {
         PlayerPrefs.SetInt("HighScore", score);
         PlayerPrefs.Save(); // обязательно для записи на диск

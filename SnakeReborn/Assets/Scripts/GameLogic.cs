@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -40,6 +41,10 @@ public class GameLogic : MonoBehaviour
 
     LaserSpawnCoroutineHost _laserSpawnHost;
 
+    // Свойство для отслеживания уничтожения логики
+    private bool _isShuttingDown = false;
+    public bool IsShuttingDown => _isShuttingDown;
+
     void Awake()
     {
         var hostGo = new GameObject("~LaserSpawnCoroutineHost");
@@ -49,6 +54,7 @@ public class GameLogic : MonoBehaviour
 
     void OnDestroy()
     {
+        _isShuttingDown = true; // Фиксируем уничтожение объекта
         if (_laserSpawnHost != null)
             Destroy(_laserSpawnHost.gameObject);
     }
@@ -73,13 +79,17 @@ public class GameLogic : MonoBehaviour
 
         continueButton.onClick.AddListener(OnContinueClick);
         exitToMenuButton.onClick.AddListener(OnExitToMenuClick);
+        exitButton.onClick.AddListener(OnExitClick);
     }
 
     void InTimeStop()
     {
         _laserTimeStopGlobal = !_laserTimeStopGlobal;
         foreach (var laser in GetComponentsInChildren<Laser>(true))
+        {
             laser.isTimeStop = _laserTimeStopGlobal;
+            laser.stopTimeStart = Time.time;      
+        }
     }
 
     void OnPause()
@@ -100,7 +110,22 @@ public class GameLogic : MonoBehaviour
 
     void OnExitToMenuClick()
     {
+        Debug.Log(int.Parse(score.text));
+        Debug.Log(Score.record);
+        if (int.Parse(score.text) > Score.record)
+        {
+            Score.record = int.Parse(score.text);
+        }
         SceneManager.LoadScene("MainMenu");
+    }
+
+    void OnExitClick()
+    {
+        if (int.Parse(score.text) > Score.record)
+        {
+            Score.SaveRecord(int.Parse(score.text));
+        }
+        StartGame.OnExitClick();
     }
 
     public void DeleteObjectAbroad(GameObject gameObject)
@@ -253,6 +278,10 @@ public class GameLogic : MonoBehaviour
 
     public void ChangeScore(string text)
     {
+        if (int.Parse(score.text) > Score.record)
+        {
+            Score.record = int.Parse(score.text);
+        }
         score.text = text;
     }
 
@@ -264,10 +293,6 @@ public class GameLogic : MonoBehaviour
     public void ChangeTimer(Color color)
     {
         timerText.color = color;
-    }
-
-    public void StartGame()
-    {
     }
 
     public void GameOver()

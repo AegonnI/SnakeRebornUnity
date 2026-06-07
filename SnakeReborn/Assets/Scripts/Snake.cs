@@ -20,12 +20,21 @@ public class Snake : MonoBehaviour
 
     public int partsPerApple = 5;
 
+    public AudioClip redAppleSound;
+    public AudioClip purpleAppleSound;
+    public AudioClip goldenAppleSound;
+    public AudioClip cyanAppleSound;
+    public AudioClip deathLaserSound;
+    public AudioClip sliceLaserSound;
+
     private GameLogic _gameLogic;
     private Camera _cam;
+    private AudioSource audioSource;
 
     void Start()
     {
         effectOnSnake = new AppleEffectData();
+        audioSource = GetComponent<AudioSource>();
 
         appleEated += GrowUp;
 
@@ -57,10 +66,27 @@ public class Snake : MonoBehaviour
         appleEated();
         if (apple.effect.effectName != new AppleEffectData().effectName)
             GetEffect(apple.effect);
+        switch (apple.effect.effectName)
+        {
+            case "Effect of speed":
+                audioSource.PlayOneShot(purpleAppleSound);
+                break;
+            case "Invincibility":
+                audioSource.PlayOneShot(goldenAppleSound);
+                break;
+            case "TimeStop":
+                audioSource.PlayOneShot(cyanAppleSound);
+                break;
+            default:
+                audioSource.PlayOneShot(redAppleSound);
+                break;
+        }
     }
 
     public void Death()
     {
+        audioSource.PlayOneShot(deathLaserSound);
+
         if (!effectOnSnake.givesInvincibility)
         {
             if (GameSattings.returnToMenuAfterDeath)
@@ -86,6 +112,8 @@ public class Snake : MonoBehaviour
 
     public void Slice(GameObject slicer, GameObject snakePartObj)
     {
+        audioSource.PlayOneShot(sliceLaserSound);
+
         var slicerSr = slicer != null ? slicer.GetComponent<SpriteRenderer>() : null;
         Color sparkCol = slicerSr != null ? slicerSr.color : new Color(1f, 0.4f, 0.55f);
         Vector2 sparkPos = snakePartObj.transform.position;
@@ -151,7 +179,7 @@ public class Snake : MonoBehaviour
         if (effectOnSnake.effectName == "TimeStop" ^ effect.effectName == "TimeStop")
             timeStoped();
 
-        effectOnSnake = effect;
+        effectOnSnake = effect; 
 
         timer = Time.time;
 
