@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -460206772051881319, guid: 86a80944eccaf0d428045f428d2a5a6a, type: 3}
+      propertyPath: m_BodyType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5329543448230920833, guid: 86a80944eccaf0d428045f428d2a5a6a, type: 3}
       propertyPath: m_Name
       value: slicerLaser

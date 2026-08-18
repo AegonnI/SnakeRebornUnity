@@ -44,10 +44,10 @@ public class Snake : MonoBehaviour
         _cam = Camera.main;
 
         snakeParts = new List<GameObject>();
-        snakePart.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-        snakePart.GetComponent<SnakePart>().isHead = true;
-        snakeParts.Add(Instantiate(snakePart, new Vector2(0f, 0f), Quaternion.identity, transform));
-        snakePart.GetComponent<SnakePart>().isHead = false;
+        var head = Instantiate(snakePart, new Vector2(0f, 0f), Quaternion.identity, transform);
+        head.GetComponent<SnakePart>().isHead = true;
+        head.GetComponent<SpriteRenderer>().color = Color.white;
+        snakeParts.Add(head);
 
         isPause = false;
     }
@@ -57,6 +57,7 @@ public class Snake : MonoBehaviour
         if (!isPause)
         {
             SnakeMove();
+            CheckCollisions();
             CheckAndExpireEffect();
         }
     }
@@ -166,9 +167,13 @@ public class Snake : MonoBehaviour
 
     public void GrowUp()
     {
-        snakePart.gameObject.GetComponent<SpriteRenderer>().color = effectOnSnake.snakeColor;
         for (int i = 0; i < partsPerApple; i++)
-            snakeParts.Add(Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform));
+        {
+            var part = Instantiate(snakePart, snakeParts[^1].transform.position, Quaternion.identity, transform);
+            part.GetComponent<SnakePart>().isHead = false;
+            part.GetComponent<SpriteRenderer>().color = effectOnSnake.snakeColor;
+            snakeParts.Add(part);
+        }
         if (_gameLogic != null)
             _gameLogic.ChangeScore(snakeParts.Count.ToString());
         Score.AddScore(partsPerApple);
@@ -217,11 +222,65 @@ public class Snake : MonoBehaviour
         if (F >= 1f)
         {
             snakeParts[0].transform.position = mousePosition;
+            Physics2D.SyncTransforms();
             return;
         }
 
         float t = 1f - Mathf.Pow(1f - F, Time.deltaTime);
         snakeParts[0].transform.position = (Vector2)((1 - t) * snakeParts[0].transform.position) + t * mousePosition;
+
+        Physics2D.SyncTransforms();
+    }
+
+    const float PartHitRadius = 0.1f;
+
+    void CheckCollisions()
+    {
+        foreach (var partGo in snakeParts)
+        {
+            if (partGo == null || !partGo.TryGetComponent(out SnakePart part))
+                continue;
+
+            Vector2 pos = partGo.transform.position;
+
+            if (part.isHead)
+            {
+                foreach (var apple in FindObjectsByType<Apple>(FindObjectsSortMode.None))
+                {
+                    if (apple == null) continue;
+                    if (Vector2.Distance(pos, apple.transform.position) <= PartHitRadius * 2f)
+                    {
+                        apple.TryCollect(part, this);
+                        return;
+                    }
+                }
+            }
+
+            foreach (var laser in FindObjectsByType<DeathLaser>(FindObjectsSortMode.None))
+            {
+                if (laser != null && OverlapsTransform(laser.transform, pos, PartHitRadius))
+                {
+                    laser.TryHit(part, this);
+                    return;
+                }
+            }
+
+            foreach (var laser in FindObjectsByType<SlicerLaser>(FindObjectsSortMode.None))
+            {
+                if (laser != null && OverlapsTransform(laser.transform, pos, PartHitRadius))
+                {
+                    laser.TryHit(part, this);
+                    return;
+                }
+            }
+        }
+    }
+
+    static bool OverlapsTransform(Transform target, Vector2 worldPoint, float padding)
+    {
+        Vector2 local = target.InverseTransformPoint(worldPoint);
+        Vector2 half = (Vector2)target.lossyScale * 0.5f + Vector2.one * padding;
+        return Mathf.Abs(local.x) <= half.x && Mathf.Abs(local.y) <= half.y;
     }
 
     private void CheckAndExpireEffect()

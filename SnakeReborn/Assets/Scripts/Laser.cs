@@ -26,6 +26,7 @@ public class Laser : MonoBehaviour
     void Update()
     {
         transform.position = (Vector2)transform.position + dir * Time.deltaTime * ((isPause ? 0f : 1f) * (isTimeStop ? Mathf.Clamp01(1 - (Time.time - stopTimeStart) / stoppingDurationInSec) : 1f) * speed);
+        Physics2D.SyncTransforms();
     }
 
     void OnApplicationQuit()
